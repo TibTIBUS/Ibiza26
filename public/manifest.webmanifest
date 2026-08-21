@@ -8,6 +8,6 @@
   "theme_color": "#08080d",
   "lang": "fr",
   "icons": [
-    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    { "src": "/favicon-ibz.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]
 }
