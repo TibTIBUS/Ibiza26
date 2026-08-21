@@ -16,3 +16,9 @@
 @media(max-width:900px){.team-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:640px){.team-grid{grid-template-columns:1fr}}
 .avatar img{width:100%;height:100%;display:block;object-fit:cover;object-position:center 20%;position:relative;z-index:1}.avatar small{z-index:2;background:rgba(8,8,13,.56);backdrop-filter:blur(6px)}
+
+/* A real responsive image is more reliable than a CSS background on mobile browsers. */
+.hero-bg{background-image:none;transform:none;overflow:hidden;background:#08080d}
+.hero-bg img{width:100%;height:100%;display:block;object-fit:cover;object-position:center center;transform:scale(1.03)}
+.hero-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,5,12,.12),rgba(4,4,8,.24) 48%,#08080d 100%),linear-gradient(90deg,rgba(6,6,12,.58),transparent 70%);pointer-events:none}
+@media(max-width:640px){.hero-bg{background-position:center}.hero-bg img{object-position:62% center;transform:scale(1.01)}}
