@@ -1,0 +1,13 @@
+{
+  "name": "Ibiza 2026 — Voyage entre potes",
+  "short_name": "IBIZA 2026",
+  "description": "Le QG privé du voyage à Ibiza du 18 au 21 septembre 2026.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#08080d",
+  "theme_color": "#08080d",
+  "lang": "fr",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
