@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { tripData } from "./trip-data";
-import heroImage from "./assets/ibiza-hero.png";
+import heroImage from "./assets/ibiza-hero.webp";
 
 const statusLabels = { confirmed: "Confirmé", decide: "À décider", survival: "Selon notre état" };
 
