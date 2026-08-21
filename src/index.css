@@ -22,3 +22,8 @@
 .hero-bg img{width:100%;height:100%;display:block;object-fit:cover;object-position:center center;transform:scale(1.03)}
 .hero-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,5,12,.12),rgba(4,4,8,.24) 48%,#08080d 100%),linear-gradient(90deg,rgba(6,6,12,.58),transparent 70%);pointer-events:none}
 @media(max-width:640px){.hero-bg{background-position:center}.hero-bg img{object-position:62% center;transform:scale(1.01)}}
+
+/* Keep the sunset visible on desktop and use a cliff-focused crop on phones. */
+.hero-bg img{object-position:center center;transform:none;filter:saturate(1.04) brightness(1.08)}
+.hero-bg::after{background:linear-gradient(180deg,rgba(4,5,12,.12),rgba(4,4,8,.1) 48%,rgba(8,8,13,.42) 100%),linear-gradient(90deg,rgba(6,6,12,.46),transparent 72%)}
+@media(max-width:640px){.hero-bg img{object-position:76% center;transform:none;filter:saturate(1.06) brightness(1.12)}.hero-bg::after{background:linear-gradient(180deg,rgba(4,5,12,.1),rgba(4,4,8,.14) 54%,rgba(8,8,13,.5) 100%),linear-gradient(90deg,rgba(6,6,12,.28),transparent 80%)}}
