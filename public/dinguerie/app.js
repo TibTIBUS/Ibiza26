@@ -98,6 +98,52 @@ rouletteButton?.addEventListener("click", () => {
   }, 125);
 });
 
+const fictionalParticipants = ["Alex Turbo", "Jade Sunset", "Milo Tempo", "Nina Splash", "Rico Siesta", "Lou Fiesta"];
+const payerButton = document.getElementById("payer-button");
+const payerWheel = document.getElementById("payer-wheel");
+const payerResult = document.getElementById("payer-result");
+const payerLabels = [...document.querySelectorAll(".payer-wheel-label span")];
+let payerRotation = 0;
+let payerSpinning = false;
+
+function randomParticipantIndex(length) {
+  if (!window.crypto?.getRandomValues) return Math.floor(Math.random() * length);
+  const range = 0x100000000;
+  const limit = range - (range % length);
+  const values = new Uint32Array(1);
+  let value;
+  do { window.crypto.getRandomValues(values); value = values[0]; } while (value >= limit);
+  return value % length;
+}
+
+payerButton?.addEventListener("click", () => {
+  if (payerSpinning || !payerWheel || !payerResult) return;
+  const winnerIndex = randomParticipantIndex(fictionalParticipants.length);
+  const extraTurns = 5 + randomParticipantIndex(3);
+  const currentAngle = ((payerRotation % 360) + 360) % 360;
+  const targetAngle = (360 - winnerIndex * 60) % 360;
+  payerRotation += extraTurns * 360 + ((targetAngle - currentAngle + 360) % 360);
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const label = payerResult.querySelector("small");
+  const result = payerResult.querySelector("strong");
+
+  payerSpinning = true;
+  payerButton.disabled = true;
+  payerButton.textContent = "↻ Ça tourne…";
+  payerWheel.style.transform = `rotate(${payerRotation}deg)`;
+  payerLabels.forEach(item => { item.style.transform = `rotate(${-payerRotation}deg)`; });
+  if (label) label.textContent = "SUSPENSE…";
+  if (result) result.textContent = "La roue décide…";
+
+  window.setTimeout(() => {
+    if (label) label.textContent = "LA TOURNÉE EST POUR";
+    if (result) result.textContent = `🍻 ${fictionalParticipants[winnerIndex]} paie sa tournée !`;
+    payerButton.disabled = false;
+    payerButton.textContent = "↻ Relancer la roulette";
+    payerSpinning = false;
+  }, reducedMotion ? 120 : 3700);
+});
+
 const modal = document.getElementById("survival-modal");
 const closeButton = document.getElementById("modal-close");
 function openModal() { modal?.classList.add("open"); modal?.setAttribute("aria-hidden", "false"); document.body.style.overflow = "hidden"; closeButton?.focus(); }
