@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { tripData } from "./trip-data";
 import heroImage from "./assets/ibiza-hero.webp";
 
@@ -80,6 +80,35 @@ function Roulette() {
   return <section className="roulette section"><div className="roulette-card"><span className="kicker">Planificateur officiel</span><h2>La roulette des<br /><em>mauvaises décisions</em></h2><div className={rolling ? "roulette-result rolling" : "roulette-result"}><small>LE DESTIN A CHOISI</small><strong>{result}</strong></div><button className="primary big" onClick={roll} disabled={rolling}>🎲 {rolling ? "Ça tourne…" : "On fait quoi ?"}</button></div></section>;
 }
 
+function randomParticipantIndex(length: number) {
+  if (!window.crypto?.getRandomValues) return Math.floor(Math.random() * length);
+  const range = 0x100000000, limit = range - (range % length), values = new Uint32Array(1);
+  let value: number;
+  do { window.crypto.getRandomValues(values); value = values[0]; } while (value >= limit);
+  return value % length;
+}
+
+function PayerRoulette() {
+  const participants = tripData.participants, slice = 360 / participants.length;
+  const [rotation, setRotation] = useState(0);
+  const [winner, setWinner] = useState<(typeof participants)[number] | null>(null);
+  const [spinning, setSpinning] = useState(false);
+  const timer = useRef<number | null>(null);
+  useEffect(() => () => { if (timer.current !== null) window.clearTimeout(timer.current); }, []);
+
+  const spin = () => {
+    if (spinning) return;
+    const winnerIndex = randomParticipantIndex(participants.length), extraTurns = 5 + randomParticipantIndex(3);
+    const currentAngle = ((rotation % 360) + 360) % 360, targetAngle = (360 - winnerIndex * slice) % 360;
+    const nextRotation = rotation + extraTurns * 360 + ((targetAngle - currentAngle + 360) % 360);
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setWinner(null); setSpinning(true); setRotation(nextRotation);
+    timer.current = window.setTimeout(() => { setWinner(participants[winnerIndex]); setSpinning(false); }, reducedMotion ? 120 : 3700);
+  };
+
+  return <section className="section payer-section" aria-labelledby="payer-title"><div className="payer-card"><div className="payer-copy"><span className="kicker">Le moment de vérité</span><h2 id="payer-title">Qui paye<br /><em>sa tournée ?</em></h2><p>Six potes, une addition et aucune contestation recevable. Chaque participant a exactement une chance sur six.</p><div className="payer-result" aria-live="polite"><small>{spinning ? "SUSPENSE…" : winner ? "LA TOURNÉE EST POUR" : "PRÊTS À TENTER VOTRE CHANCE ?"}</small><strong>{winner ? `🍻 ${winner.name} paie sa tournée !` : spinning ? "La roue décide…" : "Le hasard fera son choix."}</strong></div><button className="primary big" onClick={spin} disabled={spinning}>↻ {spinning ? "Ça tourne…" : "Lancer la roulette"}</button></div><div className="payer-wheel-wrap" aria-hidden="true"><div className="payer-pointer" /><div className="payer-wheel" style={{ transform: `rotate(${rotation}deg)` }}>{participants.map((person, index) => { const angle = index * slice; return <div className="payer-wheel-label" key={person.id} style={{ transform: `rotate(${angle}deg) translateY(-112px) rotate(${-angle}deg)` }}><span style={{ transform: `rotate(${-rotation}deg)` }}>{person.name}</span></div>; })}<div className="payer-wheel-center">IBZ<span>26</span></div></div></div></div></section>;
+}
+
 function Predictions() {
   const [choices, setChoices] = useStoredState<Record<string, string>>("ibiza-pronostics", {});
   return <section className="section predictions"><SectionHeading kicker="Les paris sont ouverts" title="Vos pronostics" copy="À remplir avant le départ. Les résultats pourront être utilisés contre vous." /><div className="prediction-list">{tripData.predictions.map((question, index) => <label className="prediction" key={question}><span><small>0{index + 1}</small>{question}</span><select value={choices[question] || ""} onChange={e => setChoices({ ...choices, [question]: e.target.value })}><option value="">Choisir un coupable</option>{tripData.participants.map(person => <option key={person.id} value={person.id}>{person.name}</option>)}</select></label>)}</div></section>;
@@ -118,5 +147,5 @@ function SecretModal({ open, close }: { open: boolean; close: () => void }) {
 export default function App() {
   const [survival, setSurvival] = useState(false), [secret, setSecret] = useState(false), [logoClicks, setLogoClicks] = useState(0);
   const clickLogo = () => { const next = logoClicks + 1; setLogoClicks(next); if (next >= 5) { setSecret(true); setLogoClicks(0); } window.setTimeout(() => setLogoClicks(0), 2200); };
-  return <main><Header onSurvival={() => setSurvival(true)} /><section className="hero"><div className="hero-bg"><img src={heroImage} alt="" aria-hidden="true" fetchPriority="high" decoding="async" /></div><div className="hero-grain" /><div className="hero-content"><button className="hero-stamp" onClick={clickLogo}>MISSION · BALEARIC ISLANDS · 2026</button><h1><span>IBIZA</span><em>2026</em></h1><div className="date-line"><i />{tripData.dates.label}<i /></div><p>{tripData.tagline}</p><Countdown /><div className="hero-actions"><a className="primary" href="#programme">Voir le programme <span>↓</span></a><button className="glass-btn" onClick={() => setSurvival(true)}>🚨 Mode survie</button></div></div><div className="scroll-cue"><span>SCROLL TO IBIZA</span><i /></div></section><Team /><Program /><LiveStatus /><Bingo /><Roulette /><Predictions /><Awards /><PlaylistPhotos /><Checklist /><PhraseOfTheDay /><footer><button onClick={clickLogo}>IBIZA <span>2026</span></button><p>{tripData.dates.footerLabel}</p><i /><blockquote>Ce qui se passe à Ibiza reste…<br />probablement dans Google Photos.</blockquote><small>HECHO CON MALAS DECISIONES EN 2026</small></footer><nav className="mobile-dock" aria-label="Actions rapides"><a href="#programme">◷<span>Programme</span></a><a href="#bingo">▦<span>Bingo</span></a><button onClick={() => setSurvival(true)}>🚨<span>Survie</span></button></nav><SurvivalModal open={survival} close={() => setSurvival(false)} /><SecretModal open={secret} close={() => setSecret(false)} /></main>;
+  return <main><Header onSurvival={() => setSurvival(true)} /><section className="hero"><div className="hero-bg"><img src={heroImage} alt="" aria-hidden="true" fetchPriority="high" decoding="async" /></div><div className="hero-grain" /><div className="hero-content"><button className="hero-stamp" onClick={clickLogo}>MISSION · BALEARIC ISLANDS · 2026</button><h1><span>IBIZA</span><em>2026</em></h1><div className="date-line"><i />{tripData.dates.label}<i /></div><p>{tripData.tagline}</p><Countdown /><div className="hero-actions"><a className="primary" href="#programme">Voir le programme <span>↓</span></a><button className="glass-btn" onClick={() => setSurvival(true)}>🚨 Mode survie</button></div></div><div className="scroll-cue"><span>SCROLL TO IBIZA</span><i /></div></section><Team /><Program /><LiveStatus /><Bingo /><Roulette /><PayerRoulette /><Predictions /><Awards /><PlaylistPhotos /><Checklist /><PhraseOfTheDay /><footer><button onClick={clickLogo}>IBIZA <span>2026</span></button><p>{tripData.dates.footerLabel}</p><i /><blockquote>Ce qui se passe à Ibiza reste…<br />probablement dans Google Photos.</blockquote><small>HECHO CON MALAS DECISIONES EN 2026</small></footer><nav className="mobile-dock" aria-label="Actions rapides"><a href="#programme">◷<span>Programme</span></a><a href="#bingo">▦<span>Bingo</span></a><button onClick={() => setSurvival(true)}>🚨<span>Survie</span></button></nav><SurvivalModal open={survival} close={() => setSurvival(false)} /><SecretModal open={secret} close={() => setSecret(false)} /></main>;
 }
